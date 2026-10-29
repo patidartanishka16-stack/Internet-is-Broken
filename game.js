@@ -2252,11 +2252,12 @@ class InternetIsBrokenGame {
     }
     document.getElementById('btn-menu-audio')?.addEventListener('click', toggleSoundAction);
 
-    // Responsive Canvas & Camera Resize (Portrait & Landscape)
+    // Responsive Canvas & Camera Resize (Portrait & Landscape & Android Dynamic Viewport)
     const handleResize = () => {
       if (!this.renderer || !this.camera || !this.container) return;
-      const w = this.container.clientWidth || window.innerWidth;
-      const h = this.container.clientHeight || window.innerHeight;
+      const vp = window.visualViewport;
+      const w = vp ? vp.width : (this.container.clientWidth || window.innerWidth);
+      const h = vp ? vp.height : (this.container.clientHeight || window.innerHeight);
       if (w <= 0 || h <= 0) return;
 
       const aspect = w / h;
@@ -2279,6 +2280,9 @@ class InternetIsBrokenGame {
       setTimeout(handleResize, 100);
       setTimeout(handleResize, 350);
     });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', handleResize);
+    }
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden && this.gameState === 'PLAYING') {

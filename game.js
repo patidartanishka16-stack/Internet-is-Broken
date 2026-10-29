@@ -774,7 +774,7 @@ class DynamicHazardController {
         safeLane = openLeft ? 0 : 2;
         requiredAction = openLeft ? 'MOVE_LEFT' : 'MOVE_RIGHT';
         displayedInstruction = openLeft ? 'MOVE LEFT!' : 'MOVE RIGHT!';
-        requiredKeypress = openLeft ? 'PRESS RIGHT [ → / D ]' : 'PRESS LEFT [ ← / A ]';
+        requiredKeypress = openLeft ? 'PRESS OR TAP [ RIGHT ]' : 'PRESS OR TAP [ LEFT ]';
 
         if (openLeft) {
           colliders.push(this.buildCrateBlocker(group, 1));
@@ -787,7 +787,7 @@ class DynamicHazardController {
         type = 'LOW_HURDLE';
         requiredAction = 'JUMP';
         displayedInstruction = 'JUMP!';
-        requiredKeypress = 'PRESS DUCK [ ↓ / S ]';
+        requiredKeypress = 'PRESS OR TAP [ DUCK ]';
         colliders.push(this.buildLowHurdle(group));
       }
 
@@ -796,14 +796,14 @@ class DynamicHazardController {
         type = 'OVERHEAD_BAR';
         requiredAction = 'DUCK';
         displayedInstruction = 'DUCK / SLIDE!';
-        requiredKeypress = 'PRESS JUMP [ ↑ / W / SPACE ]';
+        requiredKeypress = 'PRESS OR TAP [ JUMP ]';
         colliders.push(this.buildOverheadBar(group));
 
       } else if (rand < 0.65) {
         type = 'ROAD_GAP';
         requiredAction = 'JUMP';
         displayedInstruction = 'JUMP!';
-        requiredKeypress = 'PRESS DUCK [ ↓ / S ]';
+        requiredKeypress = 'PRESS OR TAP [ DUCK ]';
         colliders.push(this.buildRoadTrench(group));
 
       } else {
@@ -812,7 +812,7 @@ class DynamicHazardController {
         safeLane = openLeft ? 0 : 2;
         requiredAction = openLeft ? 'MOVE_LEFT' : 'MOVE_RIGHT';
         displayedInstruction = openLeft ? 'MOVE LEFT!' : 'MOVE RIGHT!';
-        requiredKeypress = openLeft ? 'PRESS RIGHT [ → / D ]' : 'PRESS LEFT [ ← / A ]';
+        requiredKeypress = openLeft ? 'PRESS OR TAP [ RIGHT ]' : 'PRESS OR TAP [ LEFT ]';
 
         if (openLeft) {
           colliders.push(this.buildCrateBlocker(group, 1));
@@ -830,7 +830,7 @@ class DynamicHazardController {
         safeLane = openLeft ? 0 : 2;
         requiredAction = openLeft ? 'MOVE_LEFT' : 'MOVE_RIGHT';
         displayedInstruction = openLeft ? 'MOVE LEFT!' : 'MOVE RIGHT!';
-        requiredKeypress = openLeft ? 'PRESS RIGHT [ → / D ]' : 'PRESS LEFT [ ← / A ]';
+        requiredKeypress = openLeft ? 'PRESS OR TAP [ RIGHT ]' : 'PRESS OR TAP [ LEFT ]';
 
         const sweeperData = this.buildMovingSweeper(group, openLeft);
         colliders.push(sweeperData.collider);
@@ -840,7 +840,7 @@ class DynamicHazardController {
         type = 'SWINGING_HAZARD';
         requiredAction = 'DUCK';
         displayedInstruction = 'DUCK / SLIDE!';
-        requiredKeypress = 'PRESS JUMP [ ↑ / W / SPACE ]';
+        requiredKeypress = 'PRESS OR TAP [ JUMP ]';
 
         const craneData = this.buildSwingingCrane(group);
         colliders.push(craneData.collider);
@@ -850,7 +850,7 @@ class DynamicHazardController {
         type = 'GLITCH_VOID';
         requiredAction = 'JUMP';
         displayedInstruction = 'JUMP!';
-        requiredKeypress = 'PRESS DUCK [ ↓ / S ]';
+        requiredKeypress = 'PRESS OR TAP [ DUCK ]';
         colliders.push(this.buildGlitchVoid(group));
       }
     }
@@ -1434,8 +1434,11 @@ class InternetIsBrokenGame {
     this.scene.background = new THREE.Color(0x87ceeb);
     this.scene.fog = new THREE.Fog(0x87ceeb, 45, 140);
 
-    const aspect = this.container.clientWidth / this.container.clientHeight;
-    this.camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 200);
+    const w = this.container.clientWidth || window.innerWidth;
+    const h = this.container.clientHeight || window.innerHeight;
+    const aspect = w / h;
+    const initialFov = aspect < 1.0 ? Math.min(84, 60 + (1.0 - aspect) * 28) : 60;
+    this.camera = new THREE.PerspectiveCamera(initialFov, aspect, 0.1, 200);
     // Menu Camera default position (framing Gizzmo handsomely in right viewport)
     this.camera.position.set(0.85, 1.45, 3.2);
 
@@ -1692,9 +1695,10 @@ class InternetIsBrokenGame {
       this.character.updateIdleMenu(delta, true);
 
       // Camera begins smooth sweep back to running chase angle
+      const isPortrait = this.camera.aspect < 1.0;
       const targetCamX = this.playerX * 0.42;
-      const targetCamY = 3.3;
-      const targetCamZ = this.playerZ + 5.8;
+      const targetCamY = isPortrait ? 3.8 : 3.3;
+      const targetCamZ = this.playerZ + (isPortrait ? 6.5 : 5.8);
 
       this.camera.position.x = THREE.MathUtils.damp(this.camera.position.x, targetCamX, 5, delta);
       this.camera.position.y = THREE.MathUtils.damp(this.camera.position.y, targetCamY, 5, delta);
@@ -1774,9 +1778,10 @@ class InternetIsBrokenGame {
     this.checkCollisions();
 
     // 11. Third-Person Chase Camera Follow (Subway Surfers perspective)
+    const isPortrait = this.camera.aspect < 1.0;
     const targetCamX = this.playerX * 0.42;
-    const targetCamY = 3.3 + (this.playerY * 0.35);
-    const targetCamZ = this.playerZ + 5.8;
+    const targetCamY = (isPortrait ? 3.8 : 3.3) + (this.playerY * 0.35);
+    const targetCamZ = this.playerZ + (isPortrait ? 6.5 : 5.8);
 
     this.camera.position.x = THREE.MathUtils.damp(this.camera.position.x, targetCamX, 12, delta);
     this.camera.position.y = THREE.MathUtils.damp(this.camera.position.y, targetCamY, 12, delta);
@@ -1833,6 +1838,10 @@ class InternetIsBrokenGame {
       this.hudPlayerName.textContent = this.currentPlayerName;
     }
 
+    if (this.playerNameInput) {
+      this.playerNameInput.blur();
+    }
+
     this.startScreen.classList.remove('active');
     this.pauseScreen.classList.remove('active');
     this.gameoverScreen.classList.remove('active');
@@ -1845,6 +1854,10 @@ class InternetIsBrokenGame {
   startCountdownSequence() {
     this.gameState = 'COUNTDOWN';
     sounds.init();
+
+    if (this.playerNameInput) {
+      this.playerNameInput.blur();
+    }
 
     if (this.countdownOverlay && this.countdownNumber) {
       this.countdownOverlay.classList.add('active');
@@ -1880,19 +1893,28 @@ class InternetIsBrokenGame {
     sounds.startMusic();
 
     this.hud.style.display = 'flex';
-    this.mobileControls.style.display = 'flex';
+    if (this.mobileControls) {
+      this.mobileControls.style.display = 'flex';
+      this.mobileControls.classList.add('visible');
+    }
   }
 
   pauseGame() {
     if (this.gameState !== 'PLAYING') return;
     this.gameState = 'PAUSED';
     this.pauseScreen.classList.add('active');
+    if (this.mobileControls) {
+      this.mobileControls.classList.remove('visible');
+    }
   }
 
   resumeGame() {
     if (this.gameState !== 'PAUSED') return;
     this.gameState = 'PLAYING';
     this.pauseScreen.classList.remove('active');
+    if (this.mobileControls) {
+      this.mobileControls.classList.add('visible');
+    }
     this.clock.start();
   }
 
@@ -1900,6 +1922,11 @@ class InternetIsBrokenGame {
   triggerGameOver() {
     this.gameState = 'GAMEOVER';
     sounds.stopMusic();
+
+    if (this.mobileControls) {
+      this.mobileControls.style.display = 'none';
+      this.mobileControls.classList.remove('visible');
+    }
 
     const finalScore = this.score;
     const finalDist = Math.floor(this.distance);
@@ -1952,7 +1979,10 @@ class InternetIsBrokenGame {
     this.startScreen.classList.add('active');
 
     this.hud.style.display = 'none';
-    this.mobileControls.style.display = 'none';
+    if (this.mobileControls) {
+      this.mobileControls.style.display = 'none';
+      this.mobileControls.classList.remove('visible');
+    }
 
     if (this.playerNameInput) {
       this.playerNameInput.value = this.currentPlayerName;
@@ -2037,51 +2067,104 @@ class InternetIsBrokenGame {
       }
     });
 
-    const btnLeft = document.getElementById('touch-left');
-    const btnRight = document.getElementById('touch-right');
-    const btnJump = document.getElementById('touch-jump');
-    const btnDuck = document.getElementById('touch-duck');
+    // Helper to bind robust Pointer Events to mobile control buttons
+    const bindTouchAction = (buttonId, actionKey) => {
+      const btn = document.getElementById(buttonId);
+      if (!btn) return;
 
-    if (btnLeft) {
-      btnLeft.addEventListener('touchstart', (e) => {
+      let isDown = false;
+
+      const onPress = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        if (isDown) return;
+        isDown = true;
+        btn.classList.add('pressed');
+
+        try {
+          if (e && e.pointerId !== undefined && btn.setPointerCapture) {
+            btn.setPointerCapture(e.pointerId);
+          }
+        } catch (_) {}
+
+        if (typeof actionKey === 'function') {
+          actionKey();
+        } else {
+          this.handlePlayerInput(actionKey);
+        }
+      };
+
+      const onRelease = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        if (!isDown) return;
+        isDown = false;
+        btn.classList.remove('pressed');
+
+        try {
+          if (e && e.pointerId !== undefined && btn.releasePointerCapture) {
+            btn.releasePointerCapture(e.pointerId);
+          }
+        } catch (_) {}
+      };
+
+      btn.addEventListener('pointerdown', onPress, { passive: false });
+      btn.addEventListener('pointerup', onRelease, { passive: false });
+      btn.addEventListener('pointercancel', onRelease, { passive: false });
+      btn.addEventListener('pointerleave', onRelease, { passive: false });
+
+      // Completely suppress duplicate click events and context menus
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
-        this.handlePlayerInput('KEY_LEFT');
+        e.stopPropagation();
       });
-      btnLeft.addEventListener('click', () => this.handlePlayerInput('KEY_LEFT'));
-    }
+      btn.addEventListener('contextmenu', (e) => e.preventDefault());
+    };
 
-    if (btnRight) {
-      btnRight.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.handlePlayerInput('KEY_RIGHT');
-      });
-      btnRight.addEventListener('click', () => this.handlePlayerInput('KEY_RIGHT'));
-    }
+    // Bind gameplay movement & action buttons (permanent reversed control mapping)
+    // RIGHT button -> handlePlayerInput('KEY_RIGHT') -> moves LEFT
+    // LEFT button -> handlePlayerInput('KEY_LEFT') -> moves RIGHT
+    // JUMP button -> handlePlayerInput('KEY_UP') -> DUCKS
+    // DUCK button -> handlePlayerInput('KEY_DOWN') -> JUMPS
+    bindTouchAction('touch-left', 'KEY_LEFT');
+    bindTouchAction('touch-right', 'KEY_RIGHT');
+    bindTouchAction('touch-jump', 'KEY_UP');
+    bindTouchAction('touch-duck', 'KEY_DOWN');
+    bindTouchAction('touch-pause', () => this.pauseGame());
 
-    if (btnJump) {
-      btnJump.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.handlePlayerInput('KEY_UP');
-      });
-      btnJump.addEventListener('click', () => this.handlePlayerInput('KEY_UP'));
-    }
-
-    if (btnDuck) {
-      btnDuck.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        this.handlePlayerInput('KEY_DOWN');
-      });
-      btnDuck.addEventListener('click', () => this.handlePlayerInput('KEY_DOWN'));
-    }
-
-    // Start Button with Mascot Reaction
+    // Start Button with Instant Touch & Click Handling
     const btnStart = document.getElementById('btn-start');
     if (btnStart) {
       btnStart.addEventListener('mouseenter', () => { this.isStartHovered = true; });
       btnStart.addEventListener('mouseleave', () => { this.isStartHovered = false; });
-      btnStart.addEventListener('click', () => {
+
+      let startDebounce = 0;
+      const onStartTrigger = (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        const now = Date.now();
+        if (now - startDebounce < 400) return;
+        startDebounce = now;
         this.handleRegistrationAndStart();
+      };
+
+      btnStart.addEventListener('pointerdown', () => {
+        btnStart.classList.add('pressed');
       });
+      btnStart.addEventListener('pointerup', (e) => {
+        btnStart.classList.remove('pressed');
+        onStartTrigger(e);
+      });
+      btnStart.addEventListener('pointercancel', () => {
+        btnStart.classList.remove('pressed');
+      });
+      btnStart.addEventListener('click', onStartTrigger);
     }
 
     // Name Input Focus Mascot Reaction
@@ -2119,7 +2202,16 @@ class InternetIsBrokenGame {
       this.clearLeaderboardRecords();
     });
 
-    document.getElementById('btn-pause')?.addEventListener('click', () => this.pauseGame());
+    const triggerPause = (e) => {
+      if (e) e.preventDefault();
+      this.pauseGame();
+    };
+    const btnPause = document.getElementById('btn-pause');
+    if (btnPause) {
+      btnPause.addEventListener('click', triggerPause);
+      btnPause.addEventListener('pointerup', triggerPause);
+    }
+
     document.getElementById('btn-resume')?.addEventListener('click', () => this.resumeGame());
     document.getElementById('btn-pause-restart')?.addEventListener('click', () => {
       this.pauseScreen.classList.remove('active');
@@ -2135,7 +2227,8 @@ class InternetIsBrokenGame {
     document.getElementById('btn-gameover-home')?.addEventListener('click', () => this.showHome());
 
     // Sound Toggles (HUD and Menu header)
-    const toggleSoundAction = () => {
+    const toggleSoundAction = (e) => {
+      if (e) e.preventDefault();
       const isMuted = sounds.toggleMute();
       const icon = isMuted ? '🔇' : '🔊';
       const text = isMuted ? 'SOUND OFF' : 'SOUND ON';
@@ -2152,16 +2245,39 @@ class InternetIsBrokenGame {
       }
     };
 
-    document.getElementById('btn-audio')?.addEventListener('click', toggleSoundAction);
+    const hudAudioBtn = document.getElementById('btn-audio');
+    if (hudAudioBtn) {
+      hudAudioBtn.addEventListener('click', toggleSoundAction);
+      hudAudioBtn.addEventListener('pointerup', toggleSoundAction);
+    }
     document.getElementById('btn-menu-audio')?.addEventListener('click', toggleSoundAction);
 
-    window.addEventListener('resize', () => {
-      if (!this.renderer || !this.camera) return;
-      const w = this.container.clientWidth;
-      const h = this.container.clientHeight;
-      this.camera.aspect = w / h;
+    // Responsive Canvas & Camera Resize (Portrait & Landscape)
+    const handleResize = () => {
+      if (!this.renderer || !this.camera || !this.container) return;
+      const w = this.container.clientWidth || window.innerWidth;
+      const h = this.container.clientHeight || window.innerHeight;
+      if (w <= 0 || h <= 0) return;
+
+      const aspect = w / h;
+      this.camera.aspect = aspect;
+
+      // Dynamic FOV adjustment: widen FOV in portrait mode so left & right lanes remain fully visible
+      if (aspect < 1.0) {
+        this.camera.fov = Math.min(84, 60 + (1.0 - aspect) * 28);
+      } else {
+        this.camera.fov = 60;
+      }
       this.camera.updateProjectionMatrix();
+
       this.renderer.setSize(w, h);
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    };
+
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('orientationchange', () => {
+      setTimeout(handleResize, 100);
+      setTimeout(handleResize, 350);
     });
 
     document.addEventListener('visibilitychange', () => {

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Internet Is Broken - 3D Cyber Runner</title>
   <meta name="description" content="A high-octane true-3D cyberpunk endless runner where your network connection glitches with 999ms ping, inverted polarity, packet loss, and 404 missing textures.">
   <meta property="og:title" content="Internet Is Broken - 3D Cyber Runner">
@@ -117,26 +117,38 @@
 
     <!-- Mobile On-Screen Controls -->
     <div id="mobile-controls" style="display: none;">
-      <div class="touch-cluster">
-        <button id="touch-left" class="btn-touch" aria-label="Steer Left">
-          <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-          <span>LEFT</span>
-        </button>
-        <button id="touch-right" class="btn-touch" aria-label="Steer Right">
-          <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-          <span>RIGHT</span>
+      <!-- Mobile Quick Pause Button -->
+      <div class="mobile-pause-bar">
+        <button id="touch-pause" class="btn-touch btn-touch-pause" aria-label="Pause Game">
+          <span>⏸ PAUSE</span>
         </button>
       </div>
 
-      <div class="touch-cluster">
-        <button id="touch-duck" class="btn-touch duck-btn" aria-label="Duck">
-          <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
-          <span>DUCK</span>
-        </button>
-        <button id="touch-jump" class="btn-touch jump-btn" aria-label="Jump">
-          <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
-          <span>JUMP</span>
-        </button>
+      <!-- Bottom Touch Action Clusters -->
+      <div class="mobile-controls-bottom">
+        <!-- Movement: Left and Right (Bottom-Left) -->
+        <div class="touch-cluster cluster-left">
+          <button id="touch-left" class="btn-touch" aria-label="Steer Left">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            <span>LEFT</span>
+          </button>
+          <button id="touch-right" class="btn-touch" aria-label="Steer Right">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            <span>RIGHT</span>
+          </button>
+        </div>
+
+        <!-- Actions: Duck and Jump (Bottom-Right) -->
+        <div class="touch-cluster cluster-right">
+          <button id="touch-duck" class="btn-touch duck-btn" aria-label="Duck or Slide">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+            <span>DUCK</span>
+          </button>
+          <button id="touch-jump" class="btn-touch jump-btn" aria-label="Jump">
+            <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+            <span>JUMP</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -242,8 +254,8 @@
             </div>
             <div class="rule-arrow">➔</div>
             <div class="rule-do">
-              <div class="do-label">PHYSICAL KEYPRESS</div>
-              <div class="do-val">PRESS RIGHT <kbd>→</kbd> or <kbd>D</kbd></div>
+              <div class="do-label">KEY OR TOUCH ACTION</div>
+              <div class="do-val">PRESS <kbd>→</kbd>/<kbd>D</kbd> or TAP <strong>[ RIGHT ]</strong></div>
             </div>
           </div>
 
@@ -257,8 +269,8 @@
             </div>
             <div class="rule-arrow">➔</div>
             <div class="rule-do">
-              <div class="do-label">PHYSICAL KEYPRESS</div>
-              <div class="do-val">PRESS LEFT <kbd>←</kbd> or <kbd>A</kbd></div>
+              <div class="do-label">KEY OR TOUCH ACTION</div>
+              <div class="do-val">PRESS <kbd>←</kbd>/<kbd>A</kbd> or TAP <strong>[ LEFT ]</strong></div>
             </div>
           </div>
 
@@ -272,8 +284,8 @@
             </div>
             <div class="rule-arrow">➔</div>
             <div class="rule-do">
-              <div class="do-label">PHYSICAL KEYPRESS</div>
-              <div class="do-val">PRESS DUCK <kbd>↓</kbd> or <kbd>S</kbd></div>
+              <div class="do-label">KEY OR TOUCH ACTION</div>
+              <div class="do-val">PRESS <kbd>↓</kbd>/<kbd>S</kbd> or TAP <strong>[ DUCK ]</strong></div>
             </div>
           </div>
 
@@ -287,8 +299,8 @@
             </div>
             <div class="rule-arrow">➔</div>
             <div class="rule-do">
-              <div class="do-label">PHYSICAL KEYPRESS</div>
-              <div class="do-val">PRESS JUMP <kbd>↑</kbd> or <kbd>W</kbd> or <kbd>Space</kbd></div>
+              <div class="do-label">KEY OR TOUCH ACTION</div>
+              <div class="do-val">PRESS <kbd>↑</kbd>/<kbd>W</kbd> or TAP <strong>[ JUMP ]</strong></div>
             </div>
           </div>
         </div>

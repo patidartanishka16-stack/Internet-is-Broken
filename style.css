@@ -31,6 +31,11 @@
   -webkit-touch-callout: none;
 }
 
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
 html, body {
   width: 100%;
   height: 100%;
@@ -38,7 +43,7 @@ html, body {
   background-color: #12161a;
   font-family: 'Chakra Petch', sans-serif;
   color: var(--ink-black);
-  touch-action: none;
+  overscroll-behavior: none;
 }
 
 #game-container {
@@ -308,7 +313,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  pointer-events: auto;
+  pointer-events: none;
   z-index: 12;
 }
 
@@ -421,27 +426,81 @@ html, body {
 /* --- MOBILE ON-SCREEN CONTROLS --- */
 #mobile-controls {
   position: absolute;
-  bottom: 16px;
-  left: 0;
-  width: 100%;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  pointer-events: none;
+  z-index: 28;
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top, 12px));
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+  padding-left: max(14px, env(safe-area-inset-left, 14px));
+  padding-right: max(14px, env(safe-area-inset-right, 14px));
+  touch-action: none;
+}
+
+#mobile-controls.visible {
+  display: flex;
+}
+
+.mobile-pause-bar {
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+  margin-top: 4px;
+}
+
+.btn-touch-pause {
+  width: auto;
+  min-width: 82px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--paper-cream);
+  border: 2px solid var(--ink-black);
+  box-shadow: var(--shadow-sm);
+  color: var(--ink-black);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.08s ease;
+}
+
+.btn-touch-pause:active,
+.btn-touch-pause.pressed {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 var(--ink-black);
+  background: #ede8d8;
+}
+
+.mobile-controls-bottom {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 0 16px;
+  width: 100%;
   pointer-events: none;
-  z-index: 20;
 }
 
 .touch-cluster {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   pointer-events: auto;
+  touch-action: none;
 }
 
 .btn-touch {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
+  width: 68px;
+  height: 68px;
+  border-radius: 18px;
   background: var(--paper-cream);
   border: 3px solid var(--ink-black);
   color: var(--ink-black);
@@ -453,40 +512,52 @@ html, body {
   font-family: 'Chakra Petch', sans-serif;
   font-weight: 800;
   box-shadow: var(--shadow-offset);
-  touch-action: manipulation;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: transform 0.05s ease, box-shadow 0.05s ease, background 0.08s ease;
+  position: relative;
 }
 
 .btn-touch svg {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   fill: currentColor;
+  pointer-events: none;
 }
 
 .btn-touch span {
-  font-size: 9px;
+  font-size: 10px;
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: 0.5px;
+  font-weight: 800;
+  pointer-events: none;
 }
 
-.btn-touch:active {
+/* Immediate tactile feedback on touch / click */
+.btn-touch:active,
+.btn-touch.pressed {
   transform: translate(3px, 3px);
   box-shadow: 1px 1px 0 var(--ink-black);
+  background: #ede8d8;
 }
 
 .btn-touch.jump-btn {
   background: #e0f2fe;
 }
+.btn-touch.jump-btn:active,
+.btn-touch.jump-btn.pressed {
+  background: #bae6fd;
+}
 
 .btn-touch.duck-btn {
   background: #fef3c7;
 }
-
-@media (min-width: 900px) and (hover: hover) {
-  #mobile-controls {
-    display: none;
-  }
+.btn-touch.duck-btn:active,
+.btn-touch.duck-btn.pressed {
+  background: #fde68a;
 }
 
 /* --- HANDCRAFTED INDIE ARCADE MAIN MENU --- */
@@ -494,7 +565,7 @@ html, body {
   position: absolute;
   inset: 0;
   z-index: 30;
-  display: flex;
+  display: none;
   flex-direction: column;
   justify-content: space-between;
   padding: 18px 24px;
@@ -504,7 +575,9 @@ html, body {
 }
 
 .arcade-menu-overlay.active {
+  display: flex;
   opacity: 1;
+  pointer-events: auto;
 }
 
 .menu-top-header {
@@ -787,7 +860,7 @@ html, body {
   width: 100%;
   height: 100%;
   background: rgba(18, 22, 26, 0.75);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 50;
@@ -798,6 +871,7 @@ html, body {
 }
 
 .screen-modal.active {
+  display: flex;
   opacity: 1;
   pointer-events: auto;
 }
@@ -1181,28 +1255,177 @@ html, body {
   color: #6b7280;
 }
 
-/* Mobile responsive layout */
+/* Mobile responsive layout & Safe Area ergonomics */
+@media (max-width: 768px) {
+  .desktop-controls-hint {
+    display: none !important;
+  }
+}
+
 @media (max-width: 680px) {
-  .menu-main-content {
-    max-width: 100%;
-  }
-  .main-title {
-    font-size: 34px;
-  }
-  .btn-arcade-hero {
-    font-size: 20px;
-    padding: 12px 18px;
+  #hud {
+    padding: 8px 10px;
+    padding-top: max(8px, env(safe-area-inset-top, 8px));
   }
   .hud-top-bar {
-    gap: 6px;
+    gap: 4px;
+    flex-wrap: nowrap;
+  }
+  .hud-group-left, .hud-group-right {
+    gap: 4px;
   }
   .arcade-hud-pill {
-    padding: 4px 8px;
+    padding: 4px 6px;
+    border-radius: 8px;
+  }
+  .pill-tag {
+    font-size: 7px;
   }
   .pill-val {
-    font-size: 15px;
+    font-size: 13px;
+  }
+  .player-name-text {
+    max-width: 70px;
+    font-size: 12px;
+  }
+  .heart-pip {
+    font-size: 11px;
+  }
+  /* Hide non-critical pills on narrow mobile screens so top bar fits cleanly */
+  .sector-pill, .speed-pill, .level-pill {
+    display: none !important;
+  }
+  .arcade-btn-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+  .instruction-box-wrapper {
+    top: 54px;
+  }
+  .instruction-card {
+    min-width: 200px;
+    padding: 4px 10px;
+    gap: 8px;
   }
   .instruction-text {
+    font-size: 18px;
+  }
+  .creature-avatar-thumb {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  .menu-main-content {
+    max-width: 100%;
+    margin: 4px 0;
+  }
+  .menu-card {
+    padding: 16px 18px;
+    gap: 12px;
+    border-radius: 18px;
+  }
+  .main-title {
+    font-size: 28px;
+    line-height: 1;
+  }
+  .title-sub {
+    font-size: 9px;
+  }
+  .tagline {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .btn-arcade-hero {
+    font-size: 18px;
+    padding: 12px 16px;
+  }
+  .btn-touch {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+  }
+  .touch-cluster {
+    gap: 10px;
+  }
+}
+
+/* Extra small mobile screens (e.g. iPhone SE / 360px Android) */
+@media (max-width: 390px) {
+  .btn-touch {
+    width: 58px;
+    height: 58px;
+    border-radius: 14px;
+  }
+  .btn-touch svg {
+    width: 20px;
+    height: 20px;
+  }
+  .btn-touch span {
+    font-size: 9px;
+  }
+  .touch-cluster {
+    gap: 8px;
+  }
+  .btn-touch-pause {
+    min-width: 74px;
+    height: 34px;
+    font-size: 10px;
+  }
+}
+
+/* Landscape mobile phone viewports */
+@media (max-height: 520px) {
+  .arcade-menu-overlay {
+    padding: 6px 12px;
+    overflow-y: auto;
+  }
+  .menu-main-content {
+    margin: 2px 0;
+  }
+  .menu-card {
+    padding: 10px 14px;
+    gap: 6px;
+  }
+  .main-title {
     font-size: 20px;
+  }
+  .tagline {
+    display: none;
+  }
+  .btn-arcade-hero {
+    font-size: 15px;
+    padding: 8px 12px;
+  }
+  .instruction-box-wrapper {
+    top: 44px;
+  }
+  .instruction-card {
+    padding: 3px 8px;
+  }
+  .instruction-text {
+    font-size: 16px;
+  }
+  .creature-avatar-thumb {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+  }
+  .btn-touch {
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+  }
+  .btn-touch svg {
+    width: 18px;
+    height: 18px;
+  }
+  .btn-touch span {
+    font-size: 8px;
+  }
+  .btn-touch-pause {
+    height: 30px;
+    font-size: 10px;
   }
 }

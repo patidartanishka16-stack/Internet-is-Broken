@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Internet Is Broken - 3D Cyber Runner</title>
+  <meta name="description" content="A high-octane true-3D cyberpunk endless runner where your network connection glitches with 999ms ping, inverted polarity, packet loss, and 404 missing textures.">
+  <meta property="og:title" content="Internet Is Broken - 3D Cyber Runner">
+  <meta property="og:description" content="A high-octane true-3D cyberpunk endless runner where your network connection glitches with 999ms ping, inverted polarity, packet loss, and 404 missing textures.">
+  <link rel="stylesheet" href="/style.css">
+  
+  <!-- Import map for Three.js ES modules -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="game-container">
+    <!-- WebGL Three.js Canvas -->
+    <canvas id="three-canvas"></canvas>
+
+    <!-- Hit Red Flash Overlay -->
+    <div id="hit-flash"></div>
+
+    <!-- Countdown Overlay (3, 2, 1, GO!) -->
+    <div id="countdown-overlay">
+      <div class="countdown-card">
+        <div class="countdown-number" id="countdown-number">3</div>
+        <div class="countdown-subtext">PREPARE TO REVERSE!</div>
+      </div>
+    </div>
+
+    <!-- Gameplay HUD -->
+    <div id="hud" style="display: none;">
+      <!-- Top Bar: Player Name, Lives, Stats, Controls -->
+      <div class="hud-top-bar">
+        <!-- Left: Registered Player Identity & Lives -->
+        <div class="hud-group-left">
+          <!-- Registered Player Name Badge -->
+          <div class="arcade-hud-pill player-pill">
+            <span class="pill-tag">RUNNER</span>
+            <span class="player-name-text" id="hud-player-name">Player</span>
+          </div>
+
+          <!-- Lives Counter -->
+          <div class="arcade-hud-pill">
+            <span class="pill-tag">LIVES</span>
+            <div class="lives-container" id="lives-container">
+              <span class="heart-pip" id="heart-1">❤️</span>
+              <span class="heart-pip" id="heart-2">❤️</span>
+              <span class="heart-pip" id="heart-3">❤️</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Score, Distance, Level, Sector, Speed & Buttons -->
+        <div class="hud-group-right">
+          <div class="arcade-hud-pill">
+            <span class="pill-tag">SCORE</span>
+            <span class="pill-val" id="score-val">0</span>
+          </div>
+
+          <div class="arcade-hud-pill">
+            <span class="pill-tag">DIST</span>
+            <span class="pill-val"><span id="dist-val">0</span><span class="unit">m</span></span>
+          </div>
+
+          <div class="arcade-hud-pill level-pill">
+            <span class="pill-tag">LVL</span>
+            <span class="pill-val" id="level-val">1</span>
+          </div>
+
+          <div class="arcade-hud-pill sector-pill">
+            <span class="pill-tag">SECTOR</span>
+            <span class="pill-val-small" id="sector-val">HIGHWAY</span>
+          </div>
+
+          <div class="arcade-hud-pill speed-pill">
+            <span class="pill-tag">SPEED</span>
+            <span class="pill-val"><span id="speed-val">24</span> <span class="unit">km/h</span></span>
+          </div>
+
+          <div class="hud-actions">
+            <button id="btn-audio" class="arcade-btn-icon" title="Toggle Sound">🔊</button>
+            <button id="btn-pause" class="arcade-btn-icon" title="Pause Game">⏸</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center: Creature Instruction Box with Reverse Rule -->
+      <div class="instruction-box-wrapper">
+        <div class="reverse-badge">
+          <span>⚠️</span> EVERYTHING IS REVERSED
+        </div>
+        <div class="instruction-card" id="instruction-card">
+          <div class="creature-avatar-thumb" id="creature-thumb">👾</div>
+          <div class="instruction-content">
+            <span class="instruction-pre">GIZZMO SHOUTS:</span>
+            <span class="instruction-text" id="instruction-display">MOVE LEFT!</span>
+            <span class="reverse-hint" id="reverse-hint">PRESS [ → ] TO COMPLY</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Desktop Reminder -->
+      <div class="hud-bottom-bar">
+        <div class="desktop-controls-hint">
+          <span>Inverted: <kbd>A</kbd>/<kbd>D</kbd> or <kbd>←</kbd>/<kbd>→</kbd> Steer &bull; <kbd>W</kbd>/<kbd>Space</kbd> Duck &bull; <kbd>S</kbd> Jump</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile On-Screen Controls -->
+    <div id="mobile-controls" style="display: none;">
+      <div class="touch-cluster">
+        <button id="touch-left" class="btn-touch" aria-label="Steer Left">
+          <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+          <span>LEFT</span>
+        </button>
+        <button id="touch-right" class="btn-touch" aria-label="Steer Right">
+          <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+          <span>RIGHT</span>
+        </button>
+      </div>
+
+      <div class="touch-cluster">
+        <button id="touch-duck" class="btn-touch duck-btn" aria-label="Duck">
+          <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+          <span>DUCK</span>
+        </button>
+        <button id="touch-jump" class="btn-touch jump-btn" aria-label="Jump">
+          <svg viewBox="0 0 24 24"><path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/></svg>
+          <span>JUMP</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 1. Handcrafted Indie Arcade Main Menu (Overlay on 3D Mascot Scene) -->
+    <div id="start-screen" class="arcade-menu-overlay active">
+      <!-- Top Bar Branding -->
+      <header class="menu-top-header">
+        <div class="cabinet-stamp">
+          <span class="stamp-dot"></span>
+          <span>ARCADE BUILD 01.4 // REV 3</span>
+        </div>
+        <div class="menu-sound-toggle">
+          <button id="btn-menu-audio" class="arcade-pill-btn" title="Toggle Sound">
+            <span id="menu-audio-icon">🔊</span> SOUND ON
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Menu Layout (Content on Left, 3D Gizzmo in Full View on Right) -->
+      <main class="menu-main-content">
+        <div class="menu-card">
+          <!-- Game Wordmark / Title -->
+          <div class="title-lockup">
+            <div class="title-sub">A WEIRD RUNNER EXPERIMENT</div>
+            <h1 class="main-title">
+              INTERNET IS<br>
+              <span class="title-highlight">BROKEN</span>
+            </h1>
+            <p class="tagline">
+              Gizzmo's routing table is completely inverted.<br>
+              <strong>Every instruction you hear is the exact opposite of what you must physically do.</strong>
+            </p>
+          </div>
+
+          <!-- Participant Registration Input -->
+          <div class="registration-field">
+            <label for="player-name-input" class="arcade-label">RUNNER TAG</label>
+            <div class="input-row">
+              <input
+                type="text"
+                id="player-name-input"
+                class="arcade-input"
+                placeholder="ENTER YOUR NAME..."
+                maxlength="20"
+                autocomplete="off"
+                spellcheck="false"
+              />
+            </div>
+            <div class="field-error" id="name-error">
+              Please enter a player name (1–20 chars) to take this machine!
+            </div>
+          </div>
+
+          <!-- Primary Call to Action -->
+          <div class="action-block">
+            <button id="btn-start" class="btn-arcade-hero">
+              <span class="btn-arrow">▶</span>
+              <span>START RUN</span>
+            </button>
+          </div>
+
+          <!-- Secondary Menu Links -->
+          <nav class="secondary-nav">
+            <button id="btn-open-leaderboard" class="btn-arcade-link">
+              🏆 LEADERBOARD
+            </button>
+            <span class="divider">&bull;</span>
+            <button id="btn-open-howtoplay" class="btn-arcade-link">
+              ❓ HOW TO PLAY
+            </button>
+          </nav>
+
+          <!-- Cabinet Record Footer -->
+          <footer class="menu-footer">
+            <span>3 LIVES PER RUN</span>
+            <span class="cabinet-record">
+              MACHINE RECORD: <strong id="start-high-score">0</strong> PTS
+            </span>
+          </footer>
+        </div>
+      </main>
+    </div>
+
+    <!-- 2. "How to Play" Illustrated Rule Sheet Modal -->
+    <div id="howtoplay-modal" class="screen-modal">
+      <div class="arcade-dialog" style="max-width: 520px;">
+        <div class="dialog-header">
+          <span class="dialog-tag">FIELD MANUAL</span>
+          <h2 class="dialog-title">THE REVERSED LAW</h2>
+          <p class="dialog-desc">
+            Listen to Gizzmo, then immediately do the opposite. One mistake costs a life.
+          </p>
+        </div>
+
+        <div class="rules-table">
+          <div class="rule-row">
+            <div class="rule-say">
+              <span class="cmd-icon">⬅️</span>
+              <div>
+                <div class="cmd-label">GIZZMO SAYS</div>
+                <div class="cmd-val">"MOVE LEFT!"</div>
+              </div>
+            </div>
+            <div class="rule-arrow">➔</div>
+            <div class="rule-do">
+              <div class="do-label">PHYSICAL KEYPRESS</div>
+              <div class="do-val">PRESS RIGHT <kbd>→</kbd> or <kbd>D</kbd></div>
+            </div>
+          </div>
+
+          <div class="rule-row">
+            <div class="rule-say">
+              <span class="cmd-icon">➡️</span>
+              <div>
+                <div class="cmd-label">GIZZMO SAYS</div>
+                <div class="cmd-val">"MOVE RIGHT!"</div>
+              </div>
+            </div>
+            <div class="rule-arrow">➔</div>
+            <div class="rule-do">
+              <div class="do-label">PHYSICAL KEYPRESS</div>
+              <div class="do-val">PRESS LEFT <kbd>←</kbd> or <kbd>A</kbd></div>
+            </div>
+          </div>
+
+          <div class="rule-row">
+            <div class="rule-say">
+              <span class="cmd-icon">⬆️</span>
+              <div>
+                <div class="cmd-label">GIZZMO SAYS</div>
+                <div class="cmd-val">"JUMP!"</div>
+              </div>
+            </div>
+            <div class="rule-arrow">➔</div>
+            <div class="rule-do">
+              <div class="do-label">PHYSICAL KEYPRESS</div>
+              <div class="do-val">PRESS DUCK <kbd>↓</kbd> or <kbd>S</kbd></div>
+            </div>
+          </div>
+
+          <div class="rule-row">
+            <div class="rule-say">
+              <span class="cmd-icon">⬇️</span>
+              <div>
+                <div class="cmd-label">GIZZMO SAYS</div>
+                <div class="cmd-val">"DUCK / SLIDE!"</div>
+              </div>
+            </div>
+            <div class="rule-arrow">➔</div>
+            <div class="rule-do">
+              <div class="do-label">PHYSICAL KEYPRESS</div>
+              <div class="do-val">PRESS JUMP <kbd>↑</kbd> or <kbd>W</kbd> or <kbd>Space</kbd></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dialog-footer">
+          <button id="btn-close-howtoplay" class="btn-arcade-action" style="width: 100%;">
+            GOT IT, LET ME RUN!
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Dedicated Persistent Leaderboard Modal -->
+    <div id="leaderboard-modal" class="screen-modal">
+      <div class="arcade-dialog" style="max-width: 540px;">
+        <div class="dialog-header">
+          <span class="dialog-tag">CABINET SCORES</span>
+          <h2 class="dialog-title">LOCAL <span>LEADERBOARD</span></h2>
+          <div class="dialog-notice">
+            Saved on this browser. Ranks update upon run completion.
+          </div>
+        </div>
+
+        <!-- Ranked Table Container -->
+        <div class="leaderboard-table-container">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th style="width: 54px;">RANK</th>
+                <th>RUNNER</th>
+                <th style="text-align: right;">SCORE</th>
+                <th style="text-align: right;">DISTANCE</th>
+                <th style="text-align: center;">LVL</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+          <div class="empty-state-card" id="leaderboard-empty" style="display: none;">
+            No completed runs on this machine yet.<br>Step up and set the first record!
+          </div>
+        </div>
+
+        <!-- Leaderboard Actions -->
+        <div class="dialog-footer-split">
+          <button id="btn-clear-leaderboard" class="btn-arcade-secondary danger-btn">
+            CLEAR RECORDS
+          </button>
+          <button id="btn-close-leaderboard" class="btn-arcade-action">
+            BACK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Pause Screen Modal -->
+    <div id="pause-screen" class="screen-modal">
+      <div class="arcade-dialog" style="max-width: 380px;">
+        <div class="dialog-header">
+          <span class="dialog-tag">SIMULATION PAUSED</span>
+          <h2 class="dialog-title">TAKE A <span>BREATHER</span></h2>
+        </div>
+
+        <div class="dialog-actions-vertical">
+          <button id="btn-resume" class="btn-arcade-hero" style="font-size: 19px; padding: 12px 20px;">
+            ▶ RESUME RUN
+          </button>
+          <button id="btn-pause-restart" class="btn-arcade-action">
+            🔄 RESTART RUN
+          </button>
+          <button id="btn-pause-leaderboard" class="btn-arcade-secondary">
+            🏆 LEADERBOARD
+          </button>
+          <button id="btn-pause-home" class="btn-arcade-secondary">
+            👤 SWITCH RUNNER / MENU
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Winner Announcement & Game Over Screen Modal -->
+    <div id="gameover-screen" class="screen-modal">
+      <div class="arcade-dialog" style="max-width: 480px;">
+        <div class="dialog-header">
+          <span class="dialog-tag stamp-dead">RUN CRASHED</span>
+          <h2 class="dialog-title" style="color: #c93b2b;">GAME <span>OVER</span></h2>
+          <div class="dialog-runner-line">
+            RUNNER: <span id="gameover-player-name" class="runner-name-highlight">Player</span>
+          </div>
+        </div>
+
+        <!-- Personal Best Badge -->
+        <div id="gameover-pb-badge" style="display: none;">
+          <span class="pb-badge">★ NEW PERSONAL BEST! ★</span>
+        </div>
+
+        <!-- Winner / Champion Announcement Card -->
+        <div class="champion-banner" id="champion-banner">
+          <div class="champion-trophy" id="champion-icon">🏆</div>
+          <div>
+            <div class="champion-text-main" id="champion-title">LEADERBOARD UPDATE</div>
+            <div class="champion-text-sub" id="champion-desc">Evaluating ranking position on this device...</div>
+          </div>
+        </div>
+
+        <!-- Run Statistics Grid -->
+        <div class="stats-summary">
+          <div class="stat-tile">
+            <span class="stat-label">FINAL SCORE</span>
+            <span class="stat-num highlight" id="gameover-score">0</span>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-label">DISTANCE</span>
+            <span class="stat-num"><span id="gameover-dist">0</span> <span class="unit">m</span></span>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-label">LEVEL REACHED</span>
+            <span class="stat-num" id="gameover-level">1</span>
+          </div>
+          <div class="stat-tile">
+            <span class="stat-label">LIVES LEFT</span>
+            <span class="stat-num" style="color: #c93b2b;">0 / 3</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="dialog-actions-vertical" style="margin-top: 6px;">
+          <button id="btn-gameover-restart" class="btn-arcade-hero" style="font-size: 19px; padding: 12px 20px;">
+            🔄 PLAY AGAIN (SAME RUNNER)
+          </button>
+          
+          <div style="display: flex; gap: 8px;">
+            <button id="btn-gameover-leaderboard" class="btn-arcade-action" style="flex: 1;">
+              🏆 LEADERBOARD
+            </button>
+            <button id="btn-gameover-home" class="btn-arcade-secondary" style="flex: 1;">
+              👤 NEW RUNNER
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vanilla JavaScript Game Logic -->
+  <script type="module" src="/game.js"></script>
+</body>
+</html>

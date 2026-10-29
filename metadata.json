@@ -1,0 +1,6 @@
+{
+  "name": "Internet Is Broken - 3D Cyber Runner",
+  "description": "A high-octane true-3D cyberpunk endless runner where your network connection glitches with 999ms ping, inverted polarity, packet loss, and 404 missing textures.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
